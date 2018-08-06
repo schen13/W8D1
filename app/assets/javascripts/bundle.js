@@ -194,9 +194,24 @@ var _session_actions = __webpack_require__(/*! ./actions/session_actions */ "./f
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 document.addEventListener('DOMContentLoaded', function () {
   var root = document.getElementById('root');
-  var store = (0, _store2.default)();
+  var store = void 0;
+
+  if (window.currentUser) {
+    var preloadedState = {
+      entities: {
+        users: _defineProperty({}, window.currentUser.id, window.currentUser)
+      },
+      session: { id: window.currentUser.id }
+    };
+    store = (0, _store2.default)(preloadedState);
+    delete window.currentUser;
+  } else {
+    store = (0, _store2.default)();
+  }
 
   window.getState = store.getState;
   window.dispatch = store.dispatch;
@@ -239,6 +254,8 @@ var _signup_container2 = _interopRequireDefault(_signup_container);
 
 var _reactRouterDom = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/es/index.js");
 
+var _route_util = __webpack_require__(/*! ../util/route_util */ "./frontend/util/route_util.jsx");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var App = function App() {
@@ -251,8 +268,8 @@ var App = function App() {
       'Bench Bnb'
     ),
     _react2.default.createElement(_greeting_container2.default, null),
-    _react2.default.createElement(_reactRouterDom.Route, { path: '/signup', component: _signup_container2.default }),
-    _react2.default.createElement(_reactRouterDom.Route, { path: '/login', component: _login_container2.default })
+    _react2.default.createElement(_route_util.AuthRoute, { path: '/signup', component: _signup_container2.default }),
+    _react2.default.createElement(_route_util.AuthRoute, { path: '/login', component: _login_container2.default })
   );
 };
 
@@ -891,6 +908,51 @@ var configureStore = function configureStore() {
 };
 
 exports.default = configureStore;
+
+/***/ }),
+
+/***/ "./frontend/util/route_util.jsx":
+/*!**************************************!*\
+  !*** ./frontend/util/route_util.jsx ***!
+  \**************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.AuthRoute = undefined;
+
+var _react = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRouterDom = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/es/index.js");
+
+var _reactRedux = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Auth = function Auth(_ref) {
+  var Component = _ref.component,
+      path = _ref.path,
+      loggedIn = _ref.loggedIn,
+      exact = _ref.exact;
+  return _react2.default.createElement(_reactRouterDom.Route, { path: path, exact: exact, render: function render(props) {
+      return !loggedIn ? _react2.default.createElement(Component, props) : _react2.default.createElement(_reactRouterDom.Redirect, { to: '/' });
+    } });
+};
+
+var mapStateToProps = function mapStateToProps(state) {
+  return {
+    loggedIn: Boolean(state.session.id)
+  };
+};
+
+var AuthRoute = exports.AuthRoute = (0, _reactRouterDom.withRouter)((0, _reactRedux.connect)(mapStateToProps, null)(Auth));
 
 /***/ }),
 
